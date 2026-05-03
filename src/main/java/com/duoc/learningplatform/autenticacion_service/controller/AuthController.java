@@ -28,7 +28,7 @@ public class AuthController {
     @PostMapping("/login")
     public LoginResponse login(@RequestBody LoginRequest request) {
 
-        // 🔐 valida usuario y password contra BD
+        // valida usuario y password contra BD
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getCorreo(),
@@ -36,10 +36,10 @@ public class AuthController {
                 )
         );
 
-        // 👤 carga usuario desde BD
+        // carga usuario desde BD
         UserDetails user = userDetailsService.loadUserByUsername(request.getCorreo());
 
-        // 🔑 genera token
+        // genera token
         String token = jwtUtil.generateToken(user);
 
         return new LoginResponse(token);

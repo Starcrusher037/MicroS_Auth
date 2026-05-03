@@ -24,16 +24,11 @@ public class UsuarioDetailsService implements UserDetailsService {
                 .builder()
                 .username(usuario.getCorreo())
                 .password(usuario.getContrasenia())
-                .roles(normalizarRol(usuario.getRol())) // 🔥 CLAVE PARA EVITAR 403
+                .roles(normalizarRol(usuario.getRol())) 
                 .disabled(!usuario.isEnabled())
                 .build();
     }
 
-    /**
-     * Normaliza el rol para Spring Security:
-     * - acepta "alumno", "ALUMNO", "profesor", etc.
-     * - elimina ROLE_ si alguien lo manda por error
-     */
     private String normalizarRol(String rol) {
         return rol
                 .trim()
