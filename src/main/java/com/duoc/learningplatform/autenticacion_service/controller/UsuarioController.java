@@ -54,4 +54,15 @@ public class UsuarioController {
         usuarioService.eliminarUsuario(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/{id}/exists")
+    public ResponseEntity<Boolean> existsUserById(@PathVariable Long id) {
+        boolean exists = usuarioService.existeUsuarioPorId(id);
+        return ResponseEntity.ok(exists);
+    }
+
+    @GetMapping("/{id}/role")
+    public String getUserRole(@PathVariable Long id) {
+        return usuarioService.obtenerRolPorId(id);
+    }
 }

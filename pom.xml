@@ -53,7 +53,7 @@
 			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
 
-		<!-- H2 (incluye consola, no necesitas otra dependencia) -->
+		<!-- H2 (incluye consola) -->
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
@@ -67,7 +67,7 @@
 			<optional>true</optional>
 		</dependency>
 
-		<!-- TEST (única correcta) -->
+		<!-- TEST  -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>

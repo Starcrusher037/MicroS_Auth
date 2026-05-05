@@ -53,4 +53,14 @@ public class UsuarioService {
         }
         usuarioRepository.deleteById(id);
     }
+
+    public String obtenerRolPorId(Long id) {
+        return usuarioRepository.findById(id)
+        .map(usuario -> usuario.getRol())
+        .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+    }
+
+    public boolean existeUsuarioPorId(Long id) {
+        return usuarioRepository.existsById(id);
+    }
 }

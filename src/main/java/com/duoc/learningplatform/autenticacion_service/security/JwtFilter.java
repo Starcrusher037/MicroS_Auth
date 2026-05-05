@@ -30,15 +30,19 @@ public class JwtFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-        // EXCLUIR AUTH COMPLETAMENTE (CRÍTICO)
-        if (request.getServletPath().startsWith("/auth")) {
+        String path = request.getServletPath();
+
+        // BYPASS DE ENDPOINTS INTERNOS Y AUTH
+        if (path.startsWith("/auth") ||
+            path.startsWith("/api/usuarios")) {
+
             filterChain.doFilter(request, response);
             return;
         }
 
         String header = request.getHeader("Authorization");
 
-        // SI NO HAY TOKEN, SOLO CONTINÚA (NO BLOQUEA)
+        // SI NO HAY TOKEN, SOLO CONTINÚA
         if (header == null || !header.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
@@ -55,7 +59,6 @@ public class JwtFilter extends OncePerRequestFilter {
                 UserDetails userDetails =
                         userDetailsService.loadUserByUsername(username);
 
-                // VALIDACIÓN TOKEN
                 if (jwtUtil.isValid(token)) {
 
                     UsernamePasswordAuthenticationToken auth =
