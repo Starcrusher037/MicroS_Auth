@@ -40,7 +40,10 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/auth/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll()
-                .requestMatchers("/api/usuarios/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/usuarios/*/exists").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/usuarios/*/role").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/usuarios/**")
+                    .hasAnyRole("ADMIN", "PROFESOR")
                 .requestMatchers("/h2-console/**").permitAll()
                 .anyRequest().authenticated()
             )

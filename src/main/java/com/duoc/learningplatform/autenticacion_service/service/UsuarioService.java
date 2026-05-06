@@ -5,6 +5,10 @@ import java.util.List;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.duoc.learningplatform.autenticacion_service.dto.RegisterRequest;
+import com.duoc.learningplatform.autenticacion_service.dto.UpdateUsuarioRequest;
+import com.duoc.learningplatform.autenticacion_service.exception.BadRequestException;
+import com.duoc.learningplatform.autenticacion_service.exception.NotFoundException;
 import com.duoc.learningplatform.autenticacion_service.model.Usuario;
 import com.duoc.learningplatform.autenticacion_service.repository.UsuarioRepository;
 
@@ -23,41 +27,54 @@ public class UsuarioService {
 
     public Usuario obtenerUsuarioPorId(Long id) {
         return usuarioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
     }
 
-    public Usuario registrarUsuario(Usuario usuario){
-        usuario.setContrasenia(passwordEncoder.encode(usuario.getContrasenia()));
+    public Usuario registrarUsuario(RegisterRequest request){
+
+        if (usuarioRepository.findByCorreo(request.getCorreo()).isPresent()) {
+            throw new BadRequestException("El correo ya está registrado");
+        }
+
+        if (!request.getRol().equals("ALUMNO") && !request.getRol().equals("PROFESOR")) {
+            throw new BadRequestException("Rol inválido");
+        }
+
+        Usuario usuario = new Usuario();
+        usuario.setNombre(request.getNombre());
+        usuario.setCorreo(request.getCorreo());
+        usuario.setContrasenia(passwordEncoder.encode(request.getContrasenia()));
+        usuario.setRol(request.getRol());
+
         return usuarioRepository.save(usuario);
     }
 
-    public Usuario modificarUsuario(Long id, Usuario usuarioActualizado){
+    public Usuario modificarUsuario(Long id, UpdateUsuarioRequest request){
+
         Usuario usuario = obtenerUsuarioPorId(id);
 
-        usuario.setNombre(usuarioActualizado.getNombre());
-        usuario.setCorreo(usuarioActualizado.getCorreo());
-
-        // si viene contraseña nueva, re-encriptar
-        if (usuarioActualizado.getContrasenia() != null && !usuarioActualizado.getContrasenia().isBlank()) {
-            usuario.setContrasenia(passwordEncoder.encode(usuarioActualizado.getContrasenia()));
+        if (!usuario.getCorreo().equals(request.getCorreo())
+                && usuarioRepository.findByCorreo(request.getCorreo()).isPresent()) {
+            throw new BadRequestException("El correo ya está registrado");
         }
 
-        usuario.setRol(usuarioActualizado.getRol());
+        usuario.setNombre(request.getNombre());
+        usuario.setCorreo(request.getCorreo());
 
         return usuarioRepository.save(usuario);
     }
 
     public void eliminarUsuario(Long id){
         if(!usuarioRepository.existsById(id)){
-            throw new RuntimeException("Usuario no encontrado");
+            throw new NotFoundException("Usuario no encontrado");
         }
         usuarioRepository.deleteById(id);
     }
 
     public String obtenerRolPorId(Long id) {
         return usuarioRepository.findById(id)
-        .map(usuario -> usuario.getRol())
-        .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        .map(Usuario::getRol)
+        .orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
     }
 
     public boolean existeUsuarioPorId(Long id) {

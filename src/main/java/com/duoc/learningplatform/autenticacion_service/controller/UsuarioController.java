@@ -7,6 +7,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.duoc.learningplatform.autenticacion_service.dto.RegisterRequest;
+import com.duoc.learningplatform.autenticacion_service.dto.UsuarioResponse;
+import com.duoc.learningplatform.autenticacion_service.dto.UpdateUsuarioRequest;
 import com.duoc.learningplatform.autenticacion_service.model.Usuario;
 import com.duoc.learningplatform.autenticacion_service.service.UsuarioService;
 
@@ -22,31 +25,65 @@ public class UsuarioController {
     private final UsuarioService usuarioService;
 
     @GetMapping
-    public ResponseEntity<List<Usuario>> obtenerTodosUsuario() {
-        return ResponseEntity.ok(usuarioService.obtenerTodosUsuarios());
+    public ResponseEntity<List<UsuarioResponse>> obtenerTodosUsuario() {
+
+        List<UsuarioResponse> lista = usuarioService.obtenerTodosUsuarios()
+                .stream()
+                .map(u -> new UsuarioResponse(
+                        u.getId(),
+                        u.getNombre(),
+                        u.getCorreo(),
+                        u.getRol()
+                ))
+                .toList();
+
+        return ResponseEntity.ok(lista);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Usuario> obtenerUsuarioPorId(@PathVariable @Positive Long id) {
-        return ResponseEntity.ok(usuarioService.obtenerUsuarioPorId(id));
+    public ResponseEntity<UsuarioResponse> obtenerUsuarioPorId(@PathVariable @Positive Long id) {
+
+        Usuario u = usuarioService.obtenerUsuarioPorId(id);
+
+        return ResponseEntity.ok(new UsuarioResponse(
+                u.getId(),
+                u.getNombre(),
+                u.getCorreo(),
+                u.getRol()
+        ));
     }
 
     @PostMapping
-    public ResponseEntity<Usuario> registrarUsuario(@Valid @RequestBody Usuario usuario) {
-        Usuario usuarioCreado = usuarioService.registrarUsuario(usuario);
+    public ResponseEntity<UsuarioResponse> registrarUsuario(@Valid @RequestBody RegisterRequest request) {
+
+        Usuario usuarioCreado = usuarioService.registrarUsuario(request);
 
         URI ruta = ServletUriComponentsBuilder.fromCurrentRequest()
-            .path("/{id}")
-            .buildAndExpand(usuarioCreado.getId())
-            .toUri();
+                .path("/{id}")
+                .buildAndExpand(usuarioCreado.getId())
+                .toUri();
 
-        return ResponseEntity.created(ruta).body(usuarioCreado);
+        return ResponseEntity.created(ruta).body(new UsuarioResponse(
+                usuarioCreado.getId(),
+                usuarioCreado.getNombre(),
+                usuarioCreado.getCorreo(),
+                usuarioCreado.getRol()
+        ));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Usuario> actualizarUsuario(@PathVariable @Positive Long id,
-                                                     @Valid @RequestBody Usuario usuario) {
-        return ResponseEntity.ok(usuarioService.modificarUsuario(id, usuario));
+    public ResponseEntity<UsuarioResponse> actualizarUsuario(
+            @PathVariable @Positive Long id,
+            @Valid @RequestBody UpdateUsuarioRequest request) {
+
+        Usuario actualizado = usuarioService.modificarUsuario(id, request);
+
+        return ResponseEntity.ok(new UsuarioResponse(
+                actualizado.getId(),
+                actualizado.getNombre(),
+                actualizado.getCorreo(),
+                actualizado.getRol()
+        ));
     }
 
     @DeleteMapping("/{id}")
@@ -57,12 +94,11 @@ public class UsuarioController {
 
     @GetMapping("/{id}/exists")
     public ResponseEntity<Boolean> existsUserById(@PathVariable Long id) {
-        boolean exists = usuarioService.existeUsuarioPorId(id);
-        return ResponseEntity.ok(exists);
+        return ResponseEntity.ok(usuarioService.existeUsuarioPorId(id));
     }
 
     @GetMapping("/{id}/role")
-    public String getUserRole(@PathVariable Long id) {
-        return usuarioService.obtenerRolPorId(id);
+    public ResponseEntity<String> getUserRole(@PathVariable Long id) {
+        return ResponseEntity.ok(usuarioService.obtenerRolPorId(id));
     }
 }

@@ -33,9 +33,7 @@ public class JwtFilter extends OncePerRequestFilter {
         String path = request.getServletPath();
 
         // BYPASS DE ENDPOINTS INTERNOS Y AUTH
-        if (path.startsWith("/auth") ||
-            path.startsWith("/api/usuarios")) {
-
+        if (path.startsWith("/auth")) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -67,7 +65,6 @@ public class JwtFilter extends OncePerRequestFilter {
                                     null,
                                     userDetails.getAuthorities()
                             );
-
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 }
             }
