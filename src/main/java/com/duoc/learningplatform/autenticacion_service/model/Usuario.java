@@ -31,7 +31,7 @@ public class Usuario {
     private String contrasenia;
 
     @NotBlank
-    @Pattern(regexp = "ALUMNO|PROFESOR",message = "El rol debe ser ALUMNO o PROFESOR")
+    @Pattern(regexp = "ALUMNO|PROFESOR|ADMIN",message = "El rol debe ser ALUMNO,PROFESOR o ADMIN")
     @Column(nullable = false)
     private String rol;
 
